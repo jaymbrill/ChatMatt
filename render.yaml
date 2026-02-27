@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: chatmatt
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node server/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CALLER_NAME
+        value: Matt
+      - key: ELEVENLABS_VOICE_ID
+        value: ErXwobaYiN019PkySvjV
+      # Set these in the Render dashboard (never commit real values):
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Set PUBLIC_BASE_URL to your Render URL after first deploy
+      # e.g. https://chatmatt.onrender.com
+      - key: PUBLIC_BASE_URL
+        sync: false
+      # DATA_DIR points to the persistent disk mount path below
+      - key: DATA_DIR
+        value: /data
+
+    disk:
+      name: chatmatt-data
+      mountPath: /data
+      sizeGB: 1

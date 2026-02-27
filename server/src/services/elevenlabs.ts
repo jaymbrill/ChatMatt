@@ -2,7 +2,9 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 
-const AUDIO_DIR = path.join(__dirname, '..', '..', 'audio');
+const AUDIO_DIR = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'audio')
+  : path.join(__dirname, '..', '..', 'audio');
 
 // Ensure audio directory exists
 if (!fs.existsSync(AUDIO_DIR)) {
