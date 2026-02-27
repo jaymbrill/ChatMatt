@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
 import http from 'http';
 import path from 'path';
 import { getDb } from './database';
@@ -33,8 +34,8 @@ const AUDIO_DIR = process.env.DATA_DIR
   ? path.join(process.env.DATA_DIR, 'audio')
   : path.join(__dirname, '..', 'audio');
 
-if (!require('fs').existsSync(AUDIO_DIR)) {
-  require('fs').mkdirSync(AUDIO_DIR, { recursive: true });
+if (!fs.existsSync(AUDIO_DIR)) {
+  fs.mkdirSync(AUDIO_DIR, { recursive: true });
 }
 
 app.use('/audio', express.static(AUDIO_DIR));
