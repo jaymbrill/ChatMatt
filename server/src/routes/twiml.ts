@@ -43,14 +43,13 @@ router.post('/answer', async (req: Request, res: Response) => {
     }
 
     twiml.play(`${baseUrl}/audio/${convData.greetingAudio}`);
-    const gather = twiml.gather({
+    twiml.gather({
       input: ['speech'],
       action: `${baseUrl}/twiml/gather?callId=${callId}`,
       speechTimeout: 'auto',
       language: 'en-US',
       speechModel: 'phone_call',
     });
-    gather.say('');
 
   } catch (err) {
     console.error('TwiML answer error:', err);
@@ -140,14 +139,13 @@ router.post('/gather', async (req: Request, res: Response) => {
       twiml.pause({ length: 1 });
       twiml.hangup();
     } else {
-      const gather = twiml.gather({
+      twiml.gather({
         input: ['speech'],
         action: `${baseUrl}/twiml/gather?callId=${callId}`,
         speechTimeout: 'auto',
         language: 'en-US',
         speechModel: 'phone_call',
       });
-      gather.say('');
     }
 
   } catch (err) {
