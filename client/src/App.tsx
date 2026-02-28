@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { Audience, ActiveCallState, CallRecord, TranscriptEntry } from './types';
 import AudienceSelector from './components/AudienceSelector';

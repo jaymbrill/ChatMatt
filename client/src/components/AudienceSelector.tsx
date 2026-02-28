@@ -61,7 +61,7 @@ export default function AudienceSelector({ audiences, selected, onSelect, onAudi
         {audiences.map(audience => (
           <div
             key={audience.id}
-            onClick={() => setEditingId(null) || onSelect(audience)}
+            onClick={() => { setEditingId(null); onSelect(audience); }}
             className={`
               card cursor-pointer bg-gradient-to-r ${RELATIONSHIP_COLORS[audience.relationship] || 'border-slate-700'}
               ${selected?.id === audience.id ? SELECTED_COLORS[audience.relationship] || 'ring-2 ring-brand-500' : 'hover:border-slate-600'}
