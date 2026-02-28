@@ -4,9 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { callQueries, audienceQueries, transcriptQueries } from '../database';
 import { textToSpeech } from '../services/elevenlabs';
 import {
-  generateGreeting,
   generateResponse,
-  initConversationState,
   ConversationState,
   ConversationTurn,
 } from '../services/ai';
@@ -30,29 +28,20 @@ router.post('/answer', async (req: Request, res: Response) => {
 
     callQueries.updateStatus(callId, 'in-progress');
 
-    const audience = audienceQueries.getById(call.audience_id);
-    if (!audience) throw new Error('Audience not found');
+    // Greeting was pre-generated in /api/calls — just look it up
+    const convData = call.conversation_state
+      ? JSON.parse(call.conversation_state) as { greetingAudio: string; state: ConversationState; history: ConversationTurn[] }
+      : null;
 
-    const lifeEvents = JSON.parse(call.life_events) as string[];
-    const questions = JSON.parse(call.questions) as string[];
-
-    // Generate greeting
-    const greetingText = await generateGreeting(audience, lifeEvents, questions);
-    const audioFile = await textToSpeech(greetingText, `${callId}-greeting`);
     const baseUrl = process.env.PUBLIC_BASE_URL;
 
-    // Initialize conversation state
-    const state = initConversationState(lifeEvents, questions);
-    state.phase = lifeEvents.length > 0 ? 'updates' : questions.length > 0 ? 'questions' : 'casual';
-    callQueries.updateConversationState(callId, JSON.stringify({ state, history: [{ role: 'assistant', content: greetingText }] }));
+    if (!convData?.greetingAudio) {
+      twiml.say('Sorry, there was an issue starting the call.');
+      res.type('text/xml').send(twiml.toString());
+      return;
+    }
 
-    // Save greeting to transcript
-    const entryId = uuidv4();
-    transcriptQueries.add({ id: entryId, call_id: callId, speaker: 'ai', text: greetingText, timestamp: new Date().toISOString() });
-    broadcast({ type: 'transcript', callId, entry: { id: entryId, speaker: 'ai', text: greetingText } });
-
-    // Build TwiML
-    twiml.play(`${baseUrl}/audio/${audioFile}`);
+    twiml.play(`${baseUrl}/audio/${convData.greetingAudio}`);
     const gather = twiml.gather({
       input: ['speech'],
       action: `${baseUrl}/twiml/gather?callId=${callId}`,
@@ -60,7 +49,7 @@ router.post('/answer', async (req: Request, res: Response) => {
       language: 'en-US',
       speechModel: 'phone_call',
     });
-    gather.say(''); // placeholder to keep gather active
+    gather.say('');
 
   } catch (err) {
     console.error('TwiML answer error:', err);
