@@ -73,7 +73,7 @@ router.post('/gather', async (req: Request, res: Response) => {
   const twiml = new VoiceResponse();
 
   try {
-    const baseUrl = process.env.PUBLIC_BASE_URL;
+    const baseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 
     const call = callQueries.getById(callId);
     if (!call) {
