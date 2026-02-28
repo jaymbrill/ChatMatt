@@ -15,7 +15,7 @@ export function getTwilioClient(): twilio.Twilio {
 export async function initiateCall(toNumber: string, callId: string): Promise<string> {
   const client = getTwilioClient();
   const from = process.env.TWILIO_FROM_NUMBER;
-  const baseUrl = process.env.PUBLIC_BASE_URL;
+  const baseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 
   if (!from) throw new Error('TWILIO_FROM_NUMBER not set');
   if (!baseUrl) throw new Error('PUBLIC_BASE_URL not set');

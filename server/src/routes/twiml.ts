@@ -18,10 +18,14 @@ const VoiceResponse = twilio.twiml.VoiceResponse;
 router.post('/answer', async (req: Request, res: Response) => {
   const { callId } = req.query as { callId: string };
   const twiml = new VoiceResponse();
+  const baseUrl = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
+
+  console.log(`[answer] callId=${callId} baseUrl=${baseUrl}`);
 
   try {
     const call = callQueries.getById(callId);
     if (!call) {
+      console.error(`[answer] call not found: ${callId}`);
       twiml.say('Sorry, call not found.');
       res.type('text/xml').send(twiml.toString());
       return;
@@ -34,9 +38,10 @@ router.post('/answer', async (req: Request, res: Response) => {
       ? JSON.parse(call.conversation_state) as { greetingAudio: string; state: ConversationState; history: ConversationTurn[] }
       : null;
 
-    const baseUrl = process.env.PUBLIC_BASE_URL;
+    console.log(`[answer] greetingAudio=${convData?.greetingAudio}`);
 
     if (!convData?.greetingAudio) {
+      console.error('[answer] no greetingAudio in conversation_state');
       twiml.say('Sorry, there was an issue starting the call.');
       res.type('text/xml').send(twiml.toString());
       return;
@@ -51,8 +56,10 @@ router.post('/answer', async (req: Request, res: Response) => {
       speechModel: 'phone_call',
     });
 
+    console.log(`[answer] TwiML: ${twiml.toString()}`);
+
   } catch (err) {
-    console.error('TwiML answer error:', err);
+    console.error('[answer] error:', err);
     twiml.say('Sorry, there was an issue starting the call.');
   }
 
