@@ -5,6 +5,7 @@ import { callQueries, audienceQueries, transcriptQueries } from '../database';
 import { textToSpeech } from '../services/elevenlabs';
 import {
   generateResponse,
+  initConversationState,
   ConversationState,
   ConversationTurn,
 } from '../services/ai';
@@ -106,7 +107,7 @@ router.post('/gather', async (req: Request, res: Response) => {
     // Load conversation state
     const convData = call.conversation_state
       ? JSON.parse(call.conversation_state) as { state: ConversationState; history: ConversationTurn[] }
-      : { state: initConversationState([], []), history: [] };
+      : { state: initConversationState([], []), history: [] as ConversationTurn[] };
 
     convData.history.push({ role: 'user', content: speechResult });
 
