@@ -55,7 +55,7 @@ router.post('/answer', async (req: Request, res: Response) => {
     twiml.play(`${baseUrl}/audio/${audioFile}`);
     const gather = twiml.gather({
       input: ['speech'],
-      action: `/twiml/gather?callId=${callId}`,
+      action: `${baseUrl}/twiml/gather?callId=${callId}`,
       speechTimeout: 'auto',
       language: 'en-US',
       speechModel: 'phone_call',
@@ -77,6 +77,8 @@ router.post('/gather', async (req: Request, res: Response) => {
   const twiml = new VoiceResponse();
 
   try {
+    const baseUrl = process.env.PUBLIC_BASE_URL;
+
     const call = callQueries.getById(callId);
     if (!call) {
       twiml.say('Goodbye!');
@@ -92,7 +94,7 @@ router.post('/gather', async (req: Request, res: Response) => {
     if (!speechResult || speechResult.trim() === '') {
       const gather = twiml.gather({
         input: ['speech'],
-        action: `/twiml/gather?callId=${callId}`,
+        action: `${baseUrl}/twiml/gather?callId=${callId}`,
         speechTimeout: 'auto',
         language: 'en-US',
       });
@@ -140,7 +142,6 @@ router.post('/gather', async (req: Request, res: Response) => {
 
     // Generate ElevenLabs audio
     const audioFile = await textToSpeech(aiResponse, `${callId}-${Date.now()}`);
-    const baseUrl = process.env.PUBLIC_BASE_URL;
 
     twiml.play(`${baseUrl}/audio/${audioFile}`);
 
@@ -151,7 +152,7 @@ router.post('/gather', async (req: Request, res: Response) => {
     } else {
       const gather = twiml.gather({
         input: ['speech'],
-        action: `/twiml/gather?callId=${callId}`,
+        action: `${baseUrl}/twiml/gather?callId=${callId}`,
         speechTimeout: 'auto',
         language: 'en-US',
         speechModel: 'phone_call',
