@@ -26,7 +26,7 @@ export async function initiateCall(toNumber: string, callId: string): Promise<st
     url: `${baseUrl}/twiml/answer?callId=${callId}`,
     statusCallback: `${baseUrl}/twiml/status?callId=${callId}`,
     statusCallbackMethod: 'POST',
-    statusCallbackEvent: ['completed', 'failed', 'no-answer', 'busy'],
+    statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
   });
 
   return call.sid;
