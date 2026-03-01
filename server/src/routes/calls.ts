@@ -59,7 +59,11 @@ router.post('/', async (req: Request, res: Response) => {
     callQueries.updateConversationState(callId, JSON.stringify({
       greetingAudio,
       state,
-      history: [{ role: 'assistant', content: greetingText }],
+      // Anthropic API requires the first message to be 'user' — prepend a stub
+      history: [
+        { role: 'user', content: 'Start the call.' },
+        { role: 'assistant', content: greetingText },
+      ],
     }));
     transcriptQueries.add({ id: entryId, call_id: callId, speaker: 'ai', text: greetingText, timestamp: new Date().toISOString() });
 

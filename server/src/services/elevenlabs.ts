@@ -19,27 +19,36 @@ export async function textToSpeech(text: string, filename: string): Promise<stri
 
   const filePath = path.join(AUDIO_DIR, `${filename}.mp3`);
 
-  const response = await axios.post(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-    {
-      text,
-      model_id: 'eleven_turbo_v2',
-      voice_settings: {
-        stability: 0.5,
-        similarity_boost: 0.75,
-        style: 0.0,
-        use_speaker_boost: true,
+  let response;
+  try {
+    response = await axios.post(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      {
+        text,
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          style: 0.0,
+          use_speaker_boost: true,
+        },
       },
-    },
-    {
-      headers: {
-        'xi-api-key': apiKey,
-        'Content-Type': 'application/json',
-        Accept: 'audio/mpeg',
-      },
-      responseType: 'arraybuffer',
+      {
+        headers: {
+          'xi-api-key': apiKey,
+          'Content-Type': 'application/json',
+          Accept: 'audio/mpeg',
+        },
+        responseType: 'arraybuffer',
+      }
+    );
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && err.response?.data) {
+      const body = Buffer.from(err.response.data as ArrayBuffer).toString('utf-8');
+      throw new Error(`ElevenLabs API error ${err.response.status}: ${body}`);
     }
-  );
+    throw err;
+  }
 
   fs.writeFileSync(filePath, response.data);
   return `${filename}.mp3`;
