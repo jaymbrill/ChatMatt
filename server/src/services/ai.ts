@@ -90,8 +90,8 @@ export async function generateResponse(
   }));
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 200,
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 150,
     system: systemPrompt,
     messages,
   });
@@ -171,7 +171,7 @@ export async function generateGreeting(audience: AudienceRow, lifeEvents: string
   const greeting = toneProfile.greeting[Math.floor(Math.random() * toneProfile.greeting.length)];
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 100,
     system: `You are ${callerName} making a phone call to your ${audience.relationship} (${audience.name}). Generate a very brief, warm opening line for the call. Just 1-2 sentences. Start with "${greeting}" or similar. Be natural and warm. No stage directions or asterisks.`,
     messages: [{ role: 'user', content: 'Start the call.' }],

@@ -60,12 +60,9 @@ function initSchema() {
 
 function seedDefaultAudiences() {
   const database = getDb();
-  const count = (database.prepare('SELECT COUNT(*) as count FROM audiences').get() as { count: number }).count;
-  if (count > 0) return;
-
   const now = new Date().toISOString();
   const insert = database.prepare(`
-    INSERT INTO audiences (id, name, relationship, phone_number, tone_profile, created_at, updated_at)
+    INSERT OR IGNORE INTO audiences (id, name, relationship, phone_number, tone_profile, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
@@ -85,6 +82,12 @@ function seedDefaultAudiences() {
     greeting: ['Hey buddy!', 'Hey sweetie!', 'Hi there!'],
     style: 'playful, encouraging, and nurturing. Keep language simple and enthusiastic. Be genuinely excited about their activities and interests. Use lots of positive reinforcement.',
     closing: ['Love you!', 'So proud of you!', 'Can\'t wait to hear more!'],
+  }), now, now);
+
+  insert.run('sister', 'Sister', 'sister', '', JSON.stringify({
+    greeting: ['Hey sis!', 'Oh hey!', 'Hey, it\'s me!'],
+    style: 'casual, warm, and sibling-familiar. Feel free to tease a little and reference shared childhood memories or inside jokes. Keep it relaxed and real — like you\'re picking up right where you left off.',
+    closing: ['Love ya!', 'Talk later!', 'Miss you!'],
   }), now, now);
 }
 
