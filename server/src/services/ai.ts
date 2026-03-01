@@ -110,13 +110,6 @@ function advanceConversationState(
   const newState = { ...state, turnCount: state.turnCount + 1 };
   const lastHumanTurn = [...history].reverse().find(h => h.role === 'user');
 
-  // Detect if farewell was spoken
-  const farewellPhrases = ['goodbye', 'bye', 'love you', 'talk soon', 'take care', 'gotta go'];
-  if (farewellPhrases.some(p => aiResponse.toLowerCase().includes(p))) {
-    newState.phase = 'farewell';
-    return newState;
-  }
-
   switch (state.phase) {
     case 'greeting':
       // After greeting and getting a response, move to updates (or questions if no updates)
@@ -124,20 +117,22 @@ function advanceConversationState(
         newState.phase = 'updates';
       } else if (lastHumanTurn && state.pendingQuestions.length > 0) {
         newState.phase = 'questions';
+      } else if (lastHumanTurn) {
+        newState.phase = 'casual';
       }
       break;
 
     case 'updates': {
-      // Mark first pending event as covered if we're in updates phase
+      // Mark first pending event as covered
       if (state.pendingEvents.length > 0) {
         newState.coveredEvents = [...state.coveredEvents, state.pendingEvents[0]];
         newState.pendingEvents = state.pendingEvents.slice(1);
       }
-      // If all events covered, move to questions (or casual/farewell)
+      // If all events covered, move to questions or casual (not farewell yet)
       if (newState.pendingEvents.length === 0 && state.pendingQuestions.length > 0) {
         newState.phase = 'questions';
-      } else if (newState.pendingEvents.length === 0 && state.pendingQuestions.length === 0) {
-        newState.phase = 'farewell';
+      } else if (newState.pendingEvents.length === 0) {
+        newState.phase = 'casual';
       }
       break;
     }
@@ -148,15 +143,16 @@ function advanceConversationState(
         newState.askedQuestions = [...state.askedQuestions, state.pendingQuestions[0]];
         newState.pendingQuestions = state.pendingQuestions.slice(1);
       }
-      // If all questions asked, move to farewell
+      // After last question is asked, give one casual turn before wrapping up
       if (newState.pendingQuestions.length === 0) {
-        newState.phase = 'farewell';
+        newState.phase = 'casual';
       }
       break;
     }
 
     case 'casual':
-      if (state.turnCount > 2) {
+      // Allow 2 casual turns before moving to farewell
+      if (state.turnCount >= 2) {
         newState.phase = 'farewell';
       }
       break;
